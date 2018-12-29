@@ -7,7 +7,7 @@ main =
   Browser.sandbox { init = init, update = update, view = view }
 
 
--- MODEL
+-- MODEL comment
 
 type alias Model = Int
 
