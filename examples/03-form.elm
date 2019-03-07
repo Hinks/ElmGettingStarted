@@ -121,10 +121,3 @@ containsNumber str =
   1. Store character variations in a list
   2. Chain functions returning a Result
 --}
-
-{--
-  1. Passwords must match
-  2. Password is over 8 characters
-  3. Password contains upper case, lower case, and numeric characters.
-  4. Password cannot be same as user name
---}
