@@ -1,7 +1,7 @@
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 
 
 -- MAIN
@@ -20,12 +20,13 @@ type alias Model =
   , age : Int
   , password : String
   , passwordAgain : String
+  , isFinishedWithForm : Bool
   }
 
 
 init : Model
 init =
-  Model "" 0 "" ""
+  Model "" 0 "" "" False
 
 
 
@@ -37,22 +38,26 @@ type Msg
   | Age String
   | Password String
   | PasswordAgain String
+  | Submit 
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
     Name name ->
-      { model | name = name }
+      { model | name = name, isFinishedWithForm = False }
     
     Age agestr ->
-      { model | age = String.toInt agestr |> Maybe.withDefault 0}
+      { model | age = String.toInt agestr |> Maybe.withDefault 0, isFinishedWithForm = False }
 
     Password password ->
-      { model | password = password }
+      { model | password = password, isFinishedWithForm = False  }
 
     PasswordAgain password ->
-      { model | passwordAgain = password }
+      { model | passwordAgain = password, isFinishedWithForm = False  }
+    
+    Submit ->
+      { model | isFinishedWithForm = True}
 
 
 
@@ -66,6 +71,7 @@ view model =
     , viewInput "number" "Age" (String.fromInt model.age) Age 
     , viewInput "password" "Password" model.password Password 
     , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
+    , button [ onClick Submit ]  [ text "Submit"]
     , viewValidation model
     ]
 
@@ -76,7 +82,11 @@ viewInput t p v toMsg =
 
 viewValidation : Model -> Html msg
 viewValidation model =
-  passwordValidation model
+  if (model.isFinishedWithForm) then 
+    passwordValidation model
+  else 
+    div [] [ text "Fill in the form."]
+
 
 passwordValidation : Model -> Html msg
 passwordValidation model =
@@ -87,35 +97,46 @@ passwordValidation model =
   else if not (passwordMatch model.password model.passwordAgain) then
     passwordError "passwords do not match!"
   else
-     div [ style "color" "green" ] [ text "OK" ]
+     div [ style "color" "green" ] [ text "Ok" ]
+
 
 passwordError : String -> Html msg
 passwordError reasonWhy =
   div [ style "color" "red" ] [ text reasonWhy ]
 
+
+-- PASSWORD VALIDATORS
+
+
 passwordMatch : String -> String -> Bool
 passwordMatch pw1 pw2 =
   pw1 == pw2
+
 
 passwordIsOver : Int -> String -> Bool
 passwordIsOver minLimit pw =
   if String.length pw < minLimit then False else True 
 
+
 containsRequiredVariationOfChars : String -> Bool
 containsRequiredVariationOfChars str =
   containsLowerCase str && containsUpperCase str && containsNumber str
+
 
 containsLowerCase : String -> Bool
 containsLowerCase str = 
   String.any Char.isLower str
 
+
 containsUpperCase : String -> Bool
 containsUpperCase str =
   String.any Char.isUpper str
 
+
 containsNumber : String -> Bool
 containsNumber str =
   String.any Char.isDigit str
+
 
 {-- Try other solutions 
   1. Store character variations in a list
