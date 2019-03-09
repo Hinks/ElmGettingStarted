@@ -92,7 +92,7 @@ passwordValidation : Model -> Html msg
 passwordValidation model =
   if not (passwordIsOver 8 model.password) then
     passwordError "password is not long enough"
-  else if not (containsRequiredVariationOfChars model.password) then 
+  else if not (containsAllVariationsOf [hasLowerCase, hasUpperCase, hasNumber] model.password) then 
     passwordError "password must contain upper case, lower case, and numeric characters."
   else if not (passwordMatch model.password model.passwordAgain) then
     passwordError "passwords do not match!"
@@ -118,23 +118,25 @@ passwordIsOver minLimit pw =
   if String.length pw < minLimit then False else True 
 
 
-containsRequiredVariationOfChars : String -> Bool
-containsRequiredVariationOfChars str =
-  containsLowerCase str && containsUpperCase str && containsNumber str
+containsAllVariationsOf : List (String -> Bool) -> String -> Bool
+containsAllVariationsOf charValidators password =
+  let 
+    validations = List.map (\validator -> validator password) charValidators
+  in
+    List.all (\validation -> validation == True) validations
 
-
-containsLowerCase : String -> Bool
-containsLowerCase str = 
+hasLowerCase : String -> Bool
+hasLowerCase str = 
   String.any Char.isLower str
 
 
-containsUpperCase : String -> Bool
-containsUpperCase str =
+hasUpperCase : String -> Bool
+hasUpperCase str =
   String.any Char.isUpper str
 
 
-containsNumber : String -> Bool
-containsNumber str =
+hasNumber : String -> Bool
+hasNumber str =
   String.any Char.isDigit str
 
 
