@@ -1,7 +1,7 @@
 import Browser
-import Html exposing (Html, Attribute, span, input, text)
+import Html exposing (Html, Attribute, span, input, text, button)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 
 
 
@@ -14,16 +14,20 @@ main =
 
 
 -- MODEL
-
+type Temperature 
+  = Celsius Float
+  | Farenheit Float
+  | InvalidCelsiusInput String
+  | InvalidFarenheitInput String
 
 type alias Model =
-  { input : String
+  { temperature : Temperature
   }
 
 
 init : Model
 init =
-  { input = "" }
+  { temperature = Celsius 0}
 
 
 
@@ -31,35 +35,81 @@ init =
 
 
 type Msg
-  = Change String
+  = ChangeCelsius String
+  | ChangeFarenheit String
+  | SwapTemperatureConverter
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Change newInput ->
-      { model | input = newInput }
+    ChangeCelsius input ->
+      { model | temperature = toTemperature input Celsius InvalidCelsiusInput}
+    
+    ChangeFarenheit input ->
+      { model | temperature = toTemperature input Farenheit InvalidFarenheitInput}
+    
+    SwapTemperatureConverter ->
+      { model | temperature = swapTemperatureConverter model.temperature }
 
+toTemperature : String -> (Float -> Temperature) -> (String -> Temperature) -> Temperature
+toTemperature input validTemp invalidTemp =
+  case String.toFloat input of 
+    Just value ->
+      validTemp value
+    
+    Nothing ->
+      invalidTemp input
 
+swapTemperatureConverter : Temperature -> Temperature
+swapTemperatureConverter temperature =
+  case temperature of
+    Celsius value ->
+      Farenheit (celsiusToFarehheit value)
+    
+    Farenheit value ->
+      Celsius (farenheitToCelsius value)
+    
+    InvalidCelsiusInput badInput ->
+      InvalidFarenheitInput badInput
+    
+    InvalidFarenheitInput badInput ->
+      InvalidCelsiusInput badInput
+
+celsiusToFarehheit : Float -> Float
+celsiusToFarehheit tempInCelsius =
+  tempInCelsius * 1.8 + 32
+
+farenheitToCelsius : Float -> Float
+farenheitToCelsius tempInFarenheit =
+  (tempInFarenheit - 32) / 1.8
 
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-  case String.toFloat model.input of
-    Just celsius ->
-      viewConverter model.input "blue" (String.fromFloat (celsius * 1.8 + 32))
+  case model.temperature of
+    Celsius value ->
+      viewConverter ("°C = ", (String.fromFloat value)) "blue" ("°F", (String.fromFloat (celsiusToFarehheit value))) ChangeCelsius
+    
+    Farenheit value -> 
+      viewConverter ("°F = ", (String.fromFloat value)) "blue" ("°C", (String.fromFloat (farenheitToCelsius value))) ChangeFarenheit
+    
+    InvalidCelsiusInput badInput -> 
+      viewConverter ("°C = ", badInput) "red" ("°F", "???") ChangeCelsius
+    
+    InvalidFarenheitInput badInput -> 
+      viewConverter ("°F = ", badInput) "red" ("°C", "???") ChangeCelsius
 
-    Nothing ->
-      viewConverter model.input "red" "???"
 
 
-viewConverter : String -> String -> String -> Html Msg
-viewConverter userInput color equivalentTemp =
+viewConverter : (String, String) -> String -> (String, String) ->  (String -> Msg) -> Html Msg
+viewConverter temperature color equivalentTemp toMsg =
   span []
-    [ input [ value userInput, onInput Change, style "width" "40px" ] []
-    , text "°C = "
-    , span [ style "color" color ] [ text equivalentTemp ]
-    , text "°F"
+    [ input [ value (Tuple.second temperature), onInput toMsg, style "width" "40px", style "border-color" color  ] []
+    , text (Tuple.first temperature)
+    , span [ style "color" color] [ text (Tuple.second equivalentTemp) ]
+    , text (Tuple.first equivalentTemp)
+    , button [onClick SwapTemperatureConverter] [text "swap"]
     ]
