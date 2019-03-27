@@ -1,8 +1,9 @@
 import Browser
 import Html exposing (..)
 import Html.Events exposing (..)
+import Html.Attributes exposing (..)
 import Random
-
+import Dict exposing (Dict)
 
 
 -- MAIN
@@ -71,7 +72,27 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ h1 [] [ text (String.fromInt model.dieFace) ]
-    , button [ onClick Roll ] [ text "Roll" ]
-    ]
+  let 
+    dieFaceUnicode = 
+      case Dict.get model.dieFace dieFaceUnicodes of
+          Just value -> 
+            value
+      
+          Nothing -> 
+            '\u{1F648}' -- Monkey icon
+  in           
+    div []
+      [ h1 [style "font-size" "48px"] [ text (String.fromChar dieFaceUnicode) ]
+      , button [ onClick Roll ] [ text "Roll" ]
+      ]
+
+
+dieFaceUnicodes : Dict Int Char
+dieFaceUnicodes = 
+  Dict.fromList 
+    [ (1, '\u{2680}')
+    , (2, '\u{2681}')
+    , (3, '\u{2682}')
+    , (4, '\u{2683}')
+    , (5, '\u{2684}')
+    , (6, '\u{2685}')]
