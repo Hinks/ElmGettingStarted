@@ -73,26 +73,11 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   let 
-    dieFaceUnicode = 
-      case Dict.get model.dieFace dieFaceUnicodes of
-          Just value -> 
-            value
-      
-          Nothing -> 
-            '\u{1F648}' -- Monkey icon
+    dieFaceImgPath = "./images/dieface" ++ String.fromInt model.dieFace ++ ".jpeg"
   in           
     div []
-      [ h1 [style "font-size" "48px"] [ text (String.fromChar dieFaceUnicode) ]
+      [ 
+        img [ src dieFaceImgPath] []
+      , div [] []
       , button [ onClick Roll ] [ text "Roll" ]
-      ]
-
-
-dieFaceUnicodes : Dict Int Char
-dieFaceUnicodes = 
-  Dict.fromList 
-    [ (1, '\u{2680}')
-    , (2, '\u{2681}')
-    , (3, '\u{2682}')
-    , (4, '\u{2683}')
-    , (5, '\u{2684}')
-    , (6, '\u{2685}')]
+      ] 
