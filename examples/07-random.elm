@@ -22,15 +22,16 @@ main =
 
 -- MODEL
 
+type Face = One | Two | Three | Four | Five | Six
 
 type alias Model =
-  { dieFace : Int
+  { dieFace : Face
   }
 
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model 6
+  ( Model One
   , Cmd.none
   )
 
@@ -41,7 +42,7 @@ init _ =
 
 type Msg
   = Roll
-  | NewFace Int
+  | NewFace Face
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -49,14 +50,25 @@ update msg model =
   case msg of
     Roll ->
       ( model
-      , Random.generate NewFace (Random.int 1 6)
+      , Random.generate NewFace roll
       )
 
-    NewFace newFace ->
-      ( Model newFace
+    NewFace face ->
+      ( Model face
       , Cmd.none
       )
 
+
+roll : Random.Generator Face
+roll =
+  Random.weighted
+    (40, One)
+    [ (20, Two)
+    , (10, Three)
+    , (10, Four)
+    , (10, Five)
+    , (10, Six)
+    ]
 
 
 -- SUBSCRIPTIONS
@@ -73,44 +85,46 @@ subscriptions model =
 
 view : Model -> Html.Html Msg
 view model =
-  Html.div []
-  [
-    svg [ width "120", height "120", viewBox "0 0 120 120" ] (drawDice model)
-    , Html.div [] []
-    , Html.button [Html.Events.onClick Roll] [Html.text "Roll"]
-
-
-  ]
+  let 
+    size = 
+      "120"
+  in
+    Html.div []
+    [
+      svg [ width size, height size, viewBox "0 0 120 120" ] (drawDice model)
+      , Html.div [] []
+      , Html.button [Html.Events.onClick Roll] [Html.text "Roll"]
+    ]
   
 drawDice : Model -> List (Svg.Svg msg)
 drawDice model =
     List.concat [ [roundRect], (drawDieFace model.dieFace) ]
 
-drawDieFace : Int -> List (Svg.Svg msg)
+drawDieFace : Face -> List (Svg.Svg msg)
 drawDieFace dieFace = 
   case dieFace of
-      1 ->
+      One ->
           [ circle [ cx "60", cy "60", r "10" ] [] ]
-      2 ->
+      Two ->
           [ 
             circle [ cx "45", cy "60", r "10" ] []
           , circle [ cx "75", cy "60", r "10" ] [] 
           ]
-      3 ->
+      Three ->
           [ 
             circle [ cx "30", cy "90", r "10" ] []
           , circle [ cx "60", cy "60", r "10" ] []
           , circle [ cx "90", cy "30", r "10" ] [] 
           ]
 
-      4 -> 
+      Four -> 
           [ 
             circle [ cx "40", cy "40", r "10" ] [] 
           , circle [ cx "80", cy "40", r "10" ] []
           , circle [ cx "40", cy "80", r "10" ] []
           , circle [ cx "80", cy "80", r "10" ] []
           ]
-      5 -> 
+      Five -> 
           [ 
             circle [ cx "40", cy "40", r "10" ] [] 
           , circle [ cx "80", cy "40", r "10" ] []
@@ -118,7 +132,7 @@ drawDieFace dieFace =
           , circle [ cx "40", cy "80", r "10" ] []
           , circle [ cx "80", cy "80", r "10" ] []
           ]
-      _ ->
+      Six ->
           [ 
             circle [ cx "45", cy "30", r "10" ] [] 
           , circle [ cx "45", cy "60", r "10" ] [] 
