@@ -25,13 +25,13 @@ main =
 type Face = One | Two | Three | Four | Five | Six
 
 type alias Model =
-  { dieFace : Face
+  { dice : List Face
   }
 
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model One
+  ( Model [ One, Two ]
   , Cmd.none
   )
 
@@ -42,7 +42,8 @@ init _ =
 
 type Msg
   = Roll
-  | NewFace Face
+  | RandomDiceFlips (List Face)
+  | NewFaces (List Face)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -50,14 +51,17 @@ update msg model =
   case msg of
     Roll ->
       ( model
-      , Random.generate NewFace roll
+      , Random.generate NewFaces (rolls (List.length model.dice))
       )
 
-    NewFace face ->
-      ( Model face
+    NewFaces faces ->
+      ( Model faces
       , Cmd.none
       )
 
+rolls : Int -> Random.Generator (List Face)
+rolls nrOfDice = 
+  Random.list nrOfDice roll
 
 roll : Random.Generator Face
 roll =
@@ -85,69 +89,96 @@ subscriptions model =
 
 view : Model -> Html.Html Msg
 view model =
-  let 
-    size = 
-      "120"
-  in
-    Html.div []
-    [
-      svg [ width size, height size, viewBox "0 0 120 120" ] (drawDice model)
-      , Html.div [] []
-      , Html.button [Html.Events.onClick Roll] [Html.text "Roll"]
-    ]
-  
+  Html.div []
+  [
+    svg [ width "120", height "120", viewBox "0 0 360 120" ] (drawDice model)
+    , Html.div [] []
+    , Html.button [Html.Events.onClick Roll] [Html.text "Roll"]
+  ]
+
+
 drawDice : Model -> List (Svg.Svg msg)
-drawDice model =
-    List.concat [ [roundRect], (drawDieFace model.dieFace) ]
+drawDice model = 
+  List.indexedMap Tuple.pair model.dice 
+  |> List.map drawSingleDice
+  |> List.concat 
 
-drawDieFace : Face -> List (Svg.Svg msg)
-drawDieFace dieFace = 
-  case dieFace of
-      One ->
-          [ circle [ cx "60", cy "60", r "10" ] [] ]
-      Two ->
+
+drawSingleDice : (Int, Face) -> List (Svg.Svg msg)
+drawSingleDice diceWithIndex =
+    List.concat 
+      [ [roundRect (Tuple.first diceWithIndex)]
+      , (drawDieFace diceWithIndex) ]
+
+drawDieFace : (Int, Face) -> List (Svg.Svg msg)
+drawDieFace diceWithIndex = 
+  let 
+    index = 
+      Tuple.first diceWithIndex
+
+    rectSize = 
+      100
+
+    dotRadius = 
+      10
+
+    rectCenterX = 
+      ((100 * index) + 50)
+    
+    dotRadiusStr = 
+      String.fromInt dotRadius
+  in 
+    case Tuple.second diceWithIndex of
+        One ->
+          [ circle [ cx (String.fromInt rectCenterX), cy "50", r dotRadiusStr ] [] ]
+
+        Two ->
           [ 
-            circle [ cx "45", cy "60", r "10" ] []
-          , circle [ cx "75", cy "60", r "10" ] [] 
-          ]
-      Three ->
-          [ 
-            circle [ cx "30", cy "90", r "10" ] []
-          , circle [ cx "60", cy "60", r "10" ] []
-          , circle [ cx "90", cy "30", r "10" ] [] 
+            circle [ cx (String.fromInt (rectCenterX - 15)), cy "50", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX + 15)), cy "50", r dotRadiusStr ] [] 
           ]
 
-      Four -> 
+        Three ->
           [ 
-            circle [ cx "40", cy "40", r "10" ] [] 
-          , circle [ cx "80", cy "40", r "10" ] []
-          , circle [ cx "40", cy "80", r "10" ] []
-          , circle [ cx "80", cy "80", r "10" ] []
+            circle [ cx (String.fromInt (rectCenterX - 30)), cy "80", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX)), cy "50", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX + 30)), cy "20", r dotRadiusStr ] [] 
           ]
-      Five -> 
+
+        Four -> 
           [ 
-            circle [ cx "40", cy "40", r "10" ] [] 
-          , circle [ cx "80", cy "40", r "10" ] []
-          , circle [ cx "60", cy "60", r "10" ] []
-          , circle [ cx "40", cy "80", r "10" ] []
-          , circle [ cx "80", cy "80", r "10" ] []
+            circle [ cx (String.fromInt (rectCenterX - 20)), cy "30", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX + 20)), cy "30", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX - 20)), cy "70", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX + 20)), cy "70", r dotRadiusStr ] []
           ]
-      Six ->
+
+        Five -> 
           [ 
-            circle [ cx "45", cy "30", r "10" ] [] 
-          , circle [ cx "45", cy "60", r "10" ] [] 
-          , circle [ cx "45", cy "90", r "10" ] [] 
-          , circle [ cx "75", cy "30", r "10" ] [] 
-          , circle [ cx "75", cy "60", r "10" ] [] 
-          , circle [ cx "75", cy "90", r "10" ] [] 
+            circle [ cx (String.fromInt (rectCenterX - 20)), cy "30", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX + 20)), cy "30", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt rectCenterX), cy "50", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX - 20)), cy "70", r dotRadiusStr ] []
+          , circle [ cx (String.fromInt (rectCenterX + 20)), cy "70", r dotRadiusStr ] []
+          ]
+          
+        Six ->
+          [ 
+            circle [ cx (String.fromInt (rectCenterX - 15)), cy "20", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX - 15)), cy "50", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX - 15)), cy "80", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX + 15)), cy "20", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX + 15)), cy "50", r dotRadiusStr ] [] 
+          , circle [ cx (String.fromInt (rectCenterX + 15)), cy "80", r dotRadiusStr ] [] 
           ]         
 
 
 
-roundRect : Svg.Svg msg
-roundRect =
-  rect [ x "10", y "10", width "100", height "100", rx "15", ry "15", roundRectStyle] [] 
+roundRect : Int -> Svg.Svg msg
+roundRect diceNrX =
+  rect [ x (String.fromInt (100 * diceNrX )), y "0", width "100", height "100", rx "15", ry "15", roundRectStyle] [] 
 
 roundRectStyle : Svg.Attribute msg
 roundRectStyle = 
   Svg.Attributes.style "fill:lightgrey;stroke:black;stroke-width:2;opacity:0.5"
+
