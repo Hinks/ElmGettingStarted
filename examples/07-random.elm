@@ -54,6 +54,10 @@ update msg model =
       , Random.generate NewFaces (rolls (List.length model.dice))
       )
 
+    RandomDiceFlips diceFlips -> 
+      ( model 
+      , Cmd.none)
+      
     NewFaces faces ->
       ( Model faces
       , Cmd.none
