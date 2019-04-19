@@ -1,5 +1,7 @@
+module Main exposing (Model(..), Msg(..), init, main, subscriptions, update, view)
+
 import Browser
-import Html exposing (Html, text, pre)
+import Html exposing (Html, pre, text)
 import Http
 
 
@@ -8,12 +10,12 @@ import Http
 
 
 main =
-  Browser.element
-    { init = init
-    , update = update
-    , subscriptions = subscriptions
-    , view = view
-    }
+    Browser.element
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }
 
 
 
@@ -21,19 +23,19 @@ main =
 
 
 type Model
-  = Failure
-  | Loading
-  | Success String
+    = Failure
+    | Loading
+    | Success String
 
 
-init : () -> (Model, Cmd Msg)
+init : () -> ( Model, Cmd Msg )
 init _ =
-  ( Loading
-  , Http.get
-      { url = "https://elm-lang.org/assets/public-opinion.txt"
-      , expect = Http.expectString GotText
-      }
-  )
+    ( Loading
+    , Http.get
+        { url = "https://elm-lang.org/assets/public-opinion.txt"
+        , expect = Http.expectString GotText
+        }
+    )
 
 
 
@@ -41,19 +43,19 @@ init _ =
 
 
 type Msg
-  = GotText (Result Http.Error String)
+    = GotText (Result Http.Error String)
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  case msg of
-    GotText result ->
-      case result of
-        Ok fullText ->
-          (Success fullText, Cmd.none)
+    case msg of
+        GotText result ->
+            case result of
+                Ok fullText ->
+                    ( Success fullText, Cmd.none )
 
-        Err _ ->
-          (Failure, Cmd.none)
+                Err _ ->
+                    ( Failure, Cmd.none )
 
 
 
@@ -62,7 +64,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+    Sub.none
 
 
 
@@ -71,12 +73,12 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-  case model of
-    Failure ->
-      text "I was unable to load your book."
+    case model of
+        Failure ->
+            text "I was unable to load your book."
 
-    Loading ->
-      text "Loading..."
+        Loading ->
+            text "Loading..."
 
-    Success fullText ->
-      pre [] [ text fullText ]
+        Success fullText ->
+            pre [] [ text fullText ]
