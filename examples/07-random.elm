@@ -136,56 +136,58 @@ drawDieFace diceWithIndex =
         index =
             Tuple.first diceWithIndex
 
-        rectSize =
-            100
-
         dotRadius =
             10
 
         rectCenterX =
             (100 * index) + 50
-
-        dotRadiusStr =
-            String.fromInt dotRadius
     in
     case Tuple.second diceWithIndex of
         One ->
-            [ circle [ cx (String.fromInt rectCenterX), cy "50", r dotRadiusStr ] [] ]
+            [ circle (dot rectCenterX 50 dotRadius) [] ]
 
         Two ->
-            [ circle [ cx (String.fromInt (rectCenterX - 15)), cy "50", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 15)), cy "50", r dotRadiusStr ] []
+            [ circle (dot (rectCenterX - 15) 50 dotRadius) []
+            , circle (dot (rectCenterX + 15) 50 dotRadius) []
             ]
 
         Three ->
-            [ circle [ cx (String.fromInt (rectCenterX - 30)), cy "80", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt rectCenterX), cy "50", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 30)), cy "20", r dotRadiusStr ] []
+            [ circle (dot (rectCenterX - 30) 80 dotRadius) []
+            , circle (dot rectCenterX 50 dotRadius) []
+            , circle (dot (rectCenterX + 30) 20 dotRadius) []
             ]
 
         Four ->
-            [ circle [ cx (String.fromInt (rectCenterX - 20)), cy "30", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 20)), cy "30", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX - 20)), cy "70", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 20)), cy "70", r dotRadiusStr ] []
+            [ circle (dot (rectCenterX - 20) 30 dotRadius) []
+            , circle (dot (rectCenterX + 20) 30 dotRadius) []
+            , circle (dot (rectCenterX - 20) 70 dotRadius) []
+            , circle (dot (rectCenterX + 20) 70 dotRadius) []
             ]
 
         Five ->
-            [ circle [ cx (String.fromInt (rectCenterX - 20)), cy "30", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 20)), cy "30", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt rectCenterX), cy "50", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX - 20)), cy "70", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 20)), cy "70", r dotRadiusStr ] []
+            [ circle (dot (rectCenterX - 20) 30 dotRadius) []
+            , circle (dot (rectCenterX + 20) 30 dotRadius) []
+            , circle (dot rectCenterX 50 dotRadius) []
+            , circle (dot (rectCenterX - 20) 70 dotRadius) []
+            , circle (dot (rectCenterX + 20) 70 dotRadius) []
             ]
 
         Six ->
-            [ circle [ cx (String.fromInt (rectCenterX - 15)), cy "20", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX - 15)), cy "50", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX - 15)), cy "80", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 15)), cy "20", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 15)), cy "50", r dotRadiusStr ] []
-            , circle [ cx (String.fromInt (rectCenterX + 15)), cy "80", r dotRadiusStr ] []
+            [ circle (dot (rectCenterX - 15) 20 dotRadius) []
+            , circle (dot (rectCenterX - 15) 50 dotRadius) []
+            , circle (dot (rectCenterX - 15) 80 dotRadius) []
+            , circle (dot (rectCenterX + 15) 20 dotRadius) []
+            , circle (dot (rectCenterX + 15) 50 dotRadius) []
+            , circle (dot (rectCenterX + 15) 80 dotRadius) []
             ]
+
+
+dot : Int -> Int -> Int -> List (Svg.Attribute msg)
+dot cx cy radius =
+    [ Svg.Attributes.cx (String.fromInt cx)
+    , Svg.Attributes.cy (String.fromInt cy)
+    , Svg.Attributes.r (String.fromInt radius)
+    ]
 
 
 roundRect : Int -> Svg.Svg msg
