@@ -117,9 +117,10 @@ view model =
 
 drawDice : Model -> List (Svg.Svg msg)
 drawDice model =
-    List.indexedMap Tuple.pair model.dice
-        |> List.map drawSingleDice
-        |> List.concat
+    model.dice
+    |> List.indexedMap Tuple.pair 
+    |> List.map drawSingleDice
+    |> List.concat
 
 
 drawSingleDice : ( Int, Face ) -> List (Svg.Svg msg)
