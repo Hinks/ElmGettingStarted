@@ -1,12 +1,15 @@
-module Main exposing (Face(..), Model, Msg(..), drawDice, drawDieFace, drawSingleDice, init, main, roll, rolls, roundRect, roundRectStyle, subscriptions, update, view)
+module Main exposing (Face(..), Model, Msg(..), drawDice, drawDie, drawDieFace, init, main, roundRect, roundRectStyle, subscriptions, update, view)
 
 import Browser
 import Dict exposing (Dict)
 import Html
 import Html.Events
+import Process
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Task
+import Time
 
 
 
@@ -35,14 +38,35 @@ type Face
     | Six
 
 
-type alias Model =
-    { dice : List Face
+type alias Die =
+    { score : Face
+    , flips : List Face
     }
+
+
+type alias Model =
+    { dice : List Die
+    }
+
+
+initialDie : Die
+initialDie =
+    Die One []
+
+
+getDieFace : Die -> Face
+getDieFace die =
+    case List.head die.flips of
+        Nothing ->
+            die.score
+
+        Just face ->
+            face
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model [ One, Two, Three ]
+    ( Model [ initialDie, initialDie, initialDie ]
     , Cmd.none
     )
 
@@ -53,8 +77,7 @@ init _ =
 
 type Msg
     = Roll
-    | RandomDiceFlips (List Face)
-    | NewFaces (List Face)
+    | DiceState (List Die)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -62,27 +85,43 @@ update msg model =
     case msg of
         Roll ->
             ( model
-            , Random.generate NewFaces (rolls (List.length model.dice))
+            , Random.generate DiceState (randomDice (List.length model.dice))
             )
 
-        RandomDiceFlips diceFlips ->
-            ( model
-            , Cmd.none
-            )
-
-        NewFaces faces ->
-            ( Model faces
+        DiceState newState ->
+            ( { model | dice = newState }
             , Cmd.none
             )
 
 
-rolls : Int -> Random.Generator (List Face)
-rolls nrOfDice =
-    Random.list nrOfDice roll
+
+-- GENERATING RANDOM DICE
 
 
-roll : Random.Generator Face
-roll =
+randomDice : Int -> Random.Generator (List Die)
+randomDice number =
+    Random.list number randomDie
+
+
+randomDie : Random.Generator Die
+randomDie =
+    let
+        score =
+            randomFace
+
+        flips =
+            randomFaces 5
+    in
+    Random.map2 Die score flips
+
+
+randomFaces : Int -> Random.Generator (List Face)
+randomFaces number =
+    Random.list number randomFace
+
+
+randomFace : Random.Generator Face
+randomFace =
     Random.weighted
         ( 40, One )
         [ ( 20, Two )
@@ -99,7 +138,26 @@ roll =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    if allDiceUnmoving model.dice then
+        Sub.none
+
+    else
+        Time.every 500 (\_ -> DiceState (List.map flipDie model.dice))
+
+
+allDiceUnmoving : List Die -> Bool
+allDiceUnmoving dice =
+    List.all (\die -> List.isEmpty die.flips) dice
+
+
+flipDie : Die -> Die
+flipDie die =
+    case List.length die.flips of
+        0 ->
+            die
+
+        _ ->
+            { die | flips = List.drop 1 die.flips }
 
 
 
@@ -118,24 +176,31 @@ view model =
 drawDice : Model -> List (Svg.Svg msg)
 drawDice model =
     model.dice
-    |> List.indexedMap Tuple.pair 
-    |> List.map drawSingleDice
-    |> List.concat
+        |> List.indexedMap Tuple.pair
+        |> List.map drawDie
+        |> List.concat
 
 
-drawSingleDice : ( Int, Face ) -> List (Svg.Svg msg)
-drawSingleDice diceWithIndex =
+drawDie : ( Int, Die ) -> List (Svg.Svg msg)
+drawDie dieWithIndex =
+    let
+        index =
+            Tuple.first dieWithIndex
+
+        die =
+            Tuple.second dieWithIndex
+    in
     List.concat
-        [ [ roundRect (Tuple.first diceWithIndex) ]
-        , drawDieFace diceWithIndex
+        [ [ roundRect index ]
+        , drawDieFace ( index, getDieFace die )
         ]
 
 
 drawDieFace : ( Int, Face ) -> List (Svg.Svg msg)
-drawDieFace diceWithIndex =
+drawDieFace dieWithIndex =
     let
         index =
-            Tuple.first diceWithIndex
+            Tuple.first dieWithIndex
 
         dotRadius =
             10
@@ -143,7 +208,7 @@ drawDieFace diceWithIndex =
         rectCenterX =
             (100 * index) + 50
     in
-    case Tuple.second diceWithIndex of
+    case Tuple.second dieWithIndex of
         One ->
             [ circle (dot rectCenterX 50 dotRadius) [] ]
 
