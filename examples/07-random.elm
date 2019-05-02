@@ -110,13 +110,13 @@ randomDie =
             randomFace
 
         flips =
-            randomFaces 5
+            randomFlips 5
     in
     Random.map2 Die score flips
 
 
-randomFaces : Int -> Random.Generator (List Face)
-randomFaces number =
+randomFlips : Int -> Random.Generator (List Face)
+randomFlips number =
     Random.list number randomFace
 
 
@@ -138,16 +138,26 @@ randomFace =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if allDiceUnmoving model.dice then
+    if allDiceAreStill model.dice then
         Sub.none
 
     else
-        Time.every 500 (\_ -> DiceState (List.map flipDie model.dice))
+        Time.every 500 (\_ -> DiceState <| flipDice model.dice)
 
 
-allDiceUnmoving : List Die -> Bool
-allDiceUnmoving dice =
-    List.all (\die -> List.isEmpty die.flips) dice
+flipDice : List Die -> List Die
+flipDice dice =
+    List.map flipDie dice
+
+
+allDiceAreStill : List Die -> Bool
+allDiceAreStill dice =
+    List.all isDieStill dice
+
+
+isDieStill : Die -> Bool
+isDieStill die =
+    List.isEmpty die.flips
 
 
 flipDie : Die -> Die
@@ -164,6 +174,12 @@ flipDie die =
 -- VIEW
 
 
+type alias DieWithOrderNr =
+    { orderNr : Int
+    , die : Die
+    }
+
+
 view : Model -> Html.Html Msg
 view model =
     Html.div []
@@ -176,39 +192,45 @@ view model =
 drawDice : Model -> List (Svg.Svg msg)
 drawDice model =
     model.dice
-        |> List.indexedMap Tuple.pair
+        |> List.indexedMap DieWithOrderNr
         |> List.map drawDie
         |> List.concat
 
 
-drawDie : ( Int, Die ) -> List (Svg.Svg msg)
-drawDie dieWithIndex =
-    let
-        index =
-            Tuple.first dieWithIndex
-
-        die =
-            Tuple.second dieWithIndex
-    in
+drawDie : DieWithOrderNr -> List (Svg.Svg msg)
+drawDie dieWithOrderNr =
     List.concat
-        [ [ roundRect index ]
-        , drawDieFace ( index, getDieFace die )
+        [ [ roundRect dieWithOrderNr.orderNr ]
+        , drawDieFace (DieFaceDrawAttr dieWithOrderNr.orderNr (getDieFace dieWithOrderNr.die))
         ]
 
 
-drawDieFace : ( Int, Face ) -> List (Svg.Svg msg)
-drawDieFace dieWithIndex =
-    let
-        index =
-            Tuple.first dieWithIndex
+roundRect : Int -> Svg.Svg msg
+roundRect orderNr =
+    rect [ x (String.fromInt (100 * orderNr)), y "0", width "100", height "100", rx "15", ry "15", roundRectStyle ] []
 
+
+roundRectStyle : Svg.Attribute msg
+roundRectStyle =
+    Svg.Attributes.style "fill:lightgrey;stroke:black;stroke-width:2;opacity:0.5"
+
+
+type alias DieFaceDrawAttr =
+    { rectOrderNr : Int
+    , dieFace : Face
+    }
+
+
+drawDieFace : DieFaceDrawAttr -> List (Svg.Svg msg)
+drawDieFace dieFaceDrawAttr =
+    let
         dotRadius =
             10
 
         rectCenterX =
-            (100 * index) + 50
+            (100 * dieFaceDrawAttr.rectOrderNr) + 50
     in
-    case Tuple.second dieWithIndex of
+    case dieFaceDrawAttr.dieFace of
         One ->
             [ circle (dot rectCenterX 50 dotRadius) [] ]
 
@@ -254,13 +276,3 @@ dot cx cy radius =
     , Svg.Attributes.cy (String.fromInt cy)
     , Svg.Attributes.r (String.fromInt radius)
     ]
-
-
-roundRect : Int -> Svg.Svg msg
-roundRect diceNrX =
-    rect [ x (String.fromInt (100 * diceNrX)), y "0", width "100", height "100", rx "15", ry "15", roundRectStyle ] []
-
-
-roundRectStyle : Svg.Attribute msg
-roundRectStyle =
-    Svg.Attributes.style "fill:lightgrey;stroke:black;stroke-width:2;opacity:0.5"
