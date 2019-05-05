@@ -1,4 +1,4 @@
-module Main exposing (Face(..), Model, Msg(..), drawDice, drawDie, drawDieFace, init, main, roundRect, roundRectStyle, subscriptions, update, view)
+module Main exposing (Face(..), Model, Msg(..), init, main, roundRectStyle, subscriptions, update, view, viewDice, viewDie, viewDieFace, viewRoundRect)
 
 import Browser
 import Dict exposing (Dict)
@@ -174,40 +174,75 @@ flipDie die =
 -- VIEW
 
 
-type alias DieWithOrderNr =
+type alias DieViewAttribute =
     { orderNr : Int
     , die : Die
+    , size : Int
     }
+
+
+toDieViewAttribute : Int -> Int -> Die -> DieViewAttribute
+toDieViewAttribute size orderNr die =
+    DieViewAttribute orderNr die size
 
 
 view : Model -> Html.Html Msg
 view model =
+    let
+        dieSize =
+            120
+
+        viewBoxWidth =
+            String.fromInt (dieSize * List.length model.dice)
+
+        viewBoxHight =
+            "120"
+
+        viewBoxSize =
+            "0 0 " ++ viewBoxWidth ++ " " ++ viewBoxHight
+
+        theWidth =
+            String.fromInt (dieSize + (dieSize // 5))
+
+        theHeight =
+            theWidth
+    in
     Html.div []
-        [ svg [ width "120", height "120", viewBox "0 0 360 120" ] (drawDice model)
+        [ svg [ width theWidth, height theHeight, viewBox viewBoxSize ] (viewDice dieSize model)
         , Html.div [] []
         , Html.button [ Html.Events.onClick Roll ] [ Html.text "Roll" ]
         ]
 
 
-drawDice : Model -> List (Svg.Svg msg)
-drawDice model =
+viewDice : Int -> Model -> List (Svg.Svg msg)
+viewDice dieSize model =
     model.dice
-        |> List.indexedMap DieWithOrderNr
-        |> List.map drawDie
+        |> List.indexedMap (toDieViewAttribute dieSize)
+        |> List.map viewDie
         |> List.concat
 
 
-drawDie : DieWithOrderNr -> List (Svg.Svg msg)
-drawDie dieWithOrderNr =
+viewDie : DieViewAttribute -> List (Svg.Svg msg)
+viewDie dieViewInfo =
     List.concat
-        [ [ roundRect dieWithOrderNr.orderNr ]
-        , drawDieFace (DieFaceDrawAttr dieWithOrderNr.orderNr (getDieFace dieWithOrderNr.die))
+        [ [ viewRoundRect dieViewInfo ]
+        , viewDieFace dieViewInfo
         ]
 
 
-roundRect : Int -> Svg.Svg msg
-roundRect orderNr =
-    rect [ x (String.fromInt (100 * orderNr)), y "0", width "100", height "100", rx "15", ry "15", roundRectStyle ] []
+viewRoundRect : DieViewAttribute -> Svg.Svg msg
+viewRoundRect dieViewInfo =
+    let
+        theWidth =
+            String.fromInt dieViewInfo.size
+
+        theHeight =
+            theWidth
+
+        xpos =
+            String.fromInt (dieViewInfo.size * dieViewInfo.orderNr)
+    in
+    rect [ x xpos, y "0", width theWidth, height theHeight, rx "15", ry "15", roundRectStyle ] []
 
 
 roundRectStyle : Svg.Attribute msg
@@ -215,64 +250,95 @@ roundRectStyle =
     Svg.Attributes.style "fill:lightgrey;stroke:black;stroke-width:2;opacity:0.5"
 
 
-type alias DieFaceDrawAttr =
-    { rectOrderNr : Int
-    , dieFace : Face
-    }
-
-
-drawDieFace : DieFaceDrawAttr -> List (Svg.Svg msg)
-drawDieFace dieFaceDrawAttr =
-    let
-        dotRadius =
-            10
-
-        rectCenterX =
-            (100 * dieFaceDrawAttr.rectOrderNr) + 50
-    in
-    case dieFaceDrawAttr.dieFace of
+viewDieFace : DieViewAttribute -> List (Svg.Svg msg)
+viewDieFace dieViewAttr =
+    case getDieFace dieViewAttr.die of
         One ->
-            [ circle (dot rectCenterX 50 dotRadius) [] ]
+            [ circle (viewDot center dieViewAttr) [] ]
 
         Two ->
-            [ circle (dot (rectCenterX - 15) 50 dotRadius) []
-            , circle (dot (rectCenterX + 15) 50 dotRadius) []
+            [ circle (viewDot (Point 4 6) dieViewAttr) []
+            , circle (viewDot (Point 8 6) dieViewAttr) []
             ]
 
         Three ->
-            [ circle (dot (rectCenterX - 30) 80 dotRadius) []
-            , circle (dot rectCenterX 50 dotRadius) []
-            , circle (dot (rectCenterX + 30) 20 dotRadius) []
+            [ circle (viewDot bottomLeft dieViewAttr) []
+            , circle (viewDot center dieViewAttr) []
+            , circle (viewDot upperRight dieViewAttr) []
             ]
 
         Four ->
-            [ circle (dot (rectCenterX - 20) 30 dotRadius) []
-            , circle (dot (rectCenterX + 20) 30 dotRadius) []
-            , circle (dot (rectCenterX - 20) 70 dotRadius) []
-            , circle (dot (rectCenterX + 20) 70 dotRadius) []
+            [ circle (viewDot upperLeft dieViewAttr) []
+            , circle (viewDot upperRight dieViewAttr) []
+            , circle (viewDot bottomLeft dieViewAttr) []
+            , circle (viewDot bottomRight dieViewAttr) []
             ]
 
         Five ->
-            [ circle (dot (rectCenterX - 20) 30 dotRadius) []
-            , circle (dot (rectCenterX + 20) 30 dotRadius) []
-            , circle (dot rectCenterX 50 dotRadius) []
-            , circle (dot (rectCenterX - 20) 70 dotRadius) []
-            , circle (dot (rectCenterX + 20) 70 dotRadius) []
+            [ circle (viewDot upperLeft dieViewAttr) []
+            , circle (viewDot upperRight dieViewAttr) []
+            , circle (viewDot center dieViewAttr) []
+            , circle (viewDot bottomLeft dieViewAttr) []
+            , circle (viewDot bottomRight dieViewAttr) []
             ]
 
         Six ->
-            [ circle (dot (rectCenterX - 15) 20 dotRadius) []
-            , circle (dot (rectCenterX - 15) 50 dotRadius) []
-            , circle (dot (rectCenterX - 15) 80 dotRadius) []
-            , circle (dot (rectCenterX + 15) 20 dotRadius) []
-            , circle (dot (rectCenterX + 15) 50 dotRadius) []
-            , circle (dot (rectCenterX + 15) 80 dotRadius) []
+            [ circle (viewDot (Point 4 3) dieViewAttr) []
+            , circle (viewDot (Point 4 6) dieViewAttr) []
+            , circle (viewDot (Point 4 9) dieViewAttr) []
+            , circle (viewDot (Point 8 3) dieViewAttr) []
+            , circle (viewDot (Point 8 6) dieViewAttr) []
+            , circle (viewDot (Point 8 9) dieViewAttr) []
             ]
 
 
-dot : Int -> Int -> Int -> List (Svg.Attribute msg)
-dot cx cy radius =
-    [ Svg.Attributes.cx (String.fromInt cx)
-    , Svg.Attributes.cy (String.fromInt cy)
-    , Svg.Attributes.r (String.fromInt radius)
+type alias Point =
+    { x : Int
+    , y : Int
+    }
+
+
+viewDot : Point -> DieViewAttribute -> List (Svg.Attribute msg)
+viewDot point die =
+    let
+        radius =
+            die.size // 10
+
+        rectOrigo =
+            die.size * die.orderNr
+
+        gridValue =
+            die.size // 12
+
+        spotInRectGrid =
+            ( rectOrigo + point.x * gridValue, point.y * gridValue )
+    in
+    [ Svg.Attributes.cx <| String.fromInt <| Tuple.first spotInRectGrid
+    , Svg.Attributes.cy <| String.fromInt <| Tuple.second spotInRectGrid
+    , Svg.Attributes.r <| String.fromInt <| radius
     ]
+
+
+upperLeft : Point
+upperLeft =
+    Point 2 2
+
+
+upperRight : Point
+upperRight =
+    Point 10 2
+
+
+center : Point
+center =
+    Point 6 6
+
+
+bottomLeft : Point
+bottomLeft =
+    Point 2 10
+
+
+bottomRight : Point
+bottomRight =
+    Point 10 10
