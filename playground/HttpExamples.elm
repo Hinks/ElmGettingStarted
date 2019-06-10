@@ -14,12 +14,12 @@ main =
 
 
 type alias Model =
-    Int
+    List String
 
 
 init : Model
 init =
-    0
+    []
 
 
 
@@ -30,7 +30,7 @@ update : msg -> Model -> Model
 update msg model =
     case msg of
         _ ->
-            1
+            []
 
 
 
@@ -40,5 +40,5 @@ update msg model =
 view : Model -> Html msg
 view model =
     div []
-        [ text (String.fromInt model)
+        [ text "hello"
         ]
