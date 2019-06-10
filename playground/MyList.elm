@@ -38,6 +38,7 @@ reverse (Node 1 (Node 2 (Node 3 Empty)))
 
 --}
 
+
 reverse : MyList a -> MyList a
 reverse list =
     reverseHelper list Empty
@@ -51,6 +52,7 @@ reverseHelper original accumulator =
 
         Node x xs ->
             reverseHelper xs (Node x accumulator)
+
 
 
 -- SUM
