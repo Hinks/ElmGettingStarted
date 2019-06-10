@@ -51,12 +51,12 @@ testLength =
 testReverse : Test
 testReverse =
     describe "Reverse MyList"
-        [ test "revese empty list should just return empty list" <|
+        [ test "revese on an empty list should not have any effect" <|
             \_ ->
                 Empty
                     |> MyList.reverse
                     |> Expect.equal Empty
-        , test "reverse non empty list should reverse the elements" <|
+        , test "reverse on a non empty list should reverse the elements" <|
             \_ ->
                 listOfNumbers
                     |> MyList.reverse
