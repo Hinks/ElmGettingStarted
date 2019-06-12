@@ -16,9 +16,14 @@ listOfNumbersReversed =
     Node 3 (Node 2 (Node 1 Empty))
 
 
+double : Int -> Int
+double num =
+    num * 2
+
+
 suite : Test
 suite =
-    Test.concat [ testSum, testLength, testReverse ]
+    Test.concat [ testSum, testLength, testReverse, testMap ]
 
 
 
@@ -81,4 +86,24 @@ testSum =
                 listOfNumbers
                     |> MyList.sumTailRec
                     |> Expect.equal 6
+        ]
+
+
+
+-- MAP
+
+
+testMap : Test
+testMap =
+    describe "List map test"
+        [ test "map recursive" <|
+            \_ ->
+                listOfNumbers
+                    |> MyList.map (\x -> x * 2)
+                    |> Expect.equal (Node 2 (Node 4 (Node 6 Empty)))
+        , test "map tail recursive" <|
+            \_ ->
+                listOfNumbers
+                    |> MyList.mapTailRec double
+                    |> Expect.equal (Node 2 (Node 4 (Node 6 Empty)))
         ]

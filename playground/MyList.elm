@@ -1,4 +1,4 @@
-module MyList exposing (MyList(..), length, reverse, sum, sumTailRec)
+module MyList exposing (MyList(..), length, map, mapTailRec, reverse, sum, sumTailRec)
 
 {-
    How to import in ELM REPL:
@@ -81,3 +81,33 @@ sumTailRecHelper list acc =
 
         Node x xs ->
             sumTailRecHelper xs (acc + x)
+
+
+
+-- Map
+
+
+map : (a -> b) -> MyList a -> MyList b
+map fn list =
+    case list of
+        Empty ->
+            Empty
+
+        Node x xs ->
+            Node (fn x) (map fn xs)
+
+
+mapTailRec : (a -> b) -> MyList a -> MyList b
+mapTailRec fn list =
+    mapTailRecHelper fn list Empty
+        |> reverse
+
+
+mapTailRecHelper : (a -> b) -> MyList a -> MyList b -> MyList b
+mapTailRecHelper fn list acc =
+    case list of
+        Empty ->
+            acc
+
+        Node x xs ->
+            mapTailRecHelper fn xs (Node (fn x) acc)
