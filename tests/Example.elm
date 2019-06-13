@@ -23,7 +23,7 @@ double num =
 
 suite : Test
 suite =
-    Test.concat [ testSum, testLength, testReverse, testMap ]
+    Test.concat [ testCons, testSum, testLength, testReverse, testMap ]
 
 
 
@@ -31,6 +31,22 @@ suite =
 -- HEAD
 -- TAIL
 -- LENGTH
+
+
+testCons : Test
+testCons =
+    describe "cons"
+        [ test "element with empty list should result in one element list" <|
+            \_ ->
+                Empty
+                    |> MyList.cons 1
+                    |> Expect.equal (Node 1 Empty)
+        , test "with non empty list should give new list with element as the head" <|
+            \_ ->
+                Node 3 (Node 2 (Node 1 Empty))
+                    |> MyList.cons 4
+                    |> Expect.equal (Node 4 (Node 3 (Node 2 (Node 1 Empty))))
+        ]
 
 
 testLength : Test
