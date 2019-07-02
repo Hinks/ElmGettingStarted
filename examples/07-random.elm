@@ -304,14 +304,14 @@ viewDot point die =
         radius =
             die.size // 10
 
-        rectOrigo =
+        rectTopLeftCornerPosX =
             die.size * die.orderNr
 
         gridValue =
             die.size // 12
 
         spotInRectGrid =
-            ( rectOrigo + point.x * gridValue, point.y * gridValue )
+            ( rectTopLeftCornerPosX + point.x * gridValue, point.y * gridValue )
     in
     [ Svg.Attributes.cx <| String.fromInt <| Tuple.first spotInRectGrid
     , Svg.Attributes.cy <| String.fromInt <| Tuple.second spotInRectGrid
