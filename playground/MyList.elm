@@ -1,4 +1,4 @@
-module MyList exposing (MyList(..), cons, foldl, length, map, mapTailRec, reverse, sum, sumTailRec)
+module MyList exposing (MyList(..), cons, foldl, foldr, length, map, mapTailRec, reverse, sum, sumTailRec)
 
 {-
    How to import in ELM REPL:
@@ -128,7 +128,7 @@ mapTailRecHelper fn list acc =
 
 
 
--- FOLDR
+-- FOLDL
 
 
 foldl : (a -> b -> b) -> b -> MyList a -> b
@@ -139,3 +139,17 @@ foldl fn acc list =
 
         Node x xs ->
             foldl fn (fn x acc) xs
+
+
+
+-- FOLDR
+
+
+foldr : (a -> b -> b) -> b -> MyList a -> b
+foldr fn acc list =
+    case list of
+        Empty ->
+            acc
+
+        Node x xs ->
+            fn x (foldr fn acc xs)
