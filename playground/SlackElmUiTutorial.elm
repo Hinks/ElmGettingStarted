@@ -9,6 +9,25 @@ import Element.Input as Input
 import Html exposing (Html)
 
 
+type alias Message =
+    { author : String
+    , time : String
+    , text : String
+    }
+
+
+postedMessages : List Message
+postedMessages =
+    [ Message "User1" "6:09AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    , Message "User2" "6:10AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    , Message "User1" "6:11AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    , Message "User2" "6:12AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    , Message "User3" "6:15AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    , Message "User1" "6:16AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    , Message "User2" "6:17AM" "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    ]
+
+
 channelPanel : List String -> String -> Element msg
 channelPanel channels activeChannel =
     let
@@ -40,8 +59,8 @@ channelPanel channels activeChannel =
         List.map channelEl channels
 
 
-chatPanel : String -> Element msg
-chatPanel channel =
+chatPanel : String -> List Message -> Element msg
+chatPanel channel messages =
     let
         header =
             row
@@ -63,8 +82,16 @@ chatPanel channel =
                     }
                 ]
 
+        messageEntry message =
+            column [ width fill, spacingXY 0 5 ]
+                [ row [ spacingXY 10 0 ]
+                    [ el [ Font.bold ] <| text message.author, text message.time ]
+                , paragraph [] [ text message.text ]
+                ]
+
         messagePanel =
-            column [] []
+            column [ padding 10, spacingXY 0 20, scrollbarY ] <|
+                List.map messageEntry messages
 
         footer =
             el [ alignBottom, padding 20, width fill ] <|
@@ -95,10 +122,10 @@ chatPanel channel =
 
 main : Html msg
 main =
-    layout [] <|
+    layout [ height fill ] <|
         row [ height fill, width fill ]
             [ channelPanel
                 [ "ellie", "elm-dev", "elm-discuss", "elm-format" ]
                 "elm-dev"
-            , chatPanel "elm-dev"
+            , chatPanel "elm-dev" postedMessages
             ]
