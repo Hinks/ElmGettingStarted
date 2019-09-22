@@ -4,6 +4,7 @@ import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Json.Decode exposing (Decoder, Error(..), decodeString, list, string)
 
 
 main : Program () Model Msg
@@ -57,18 +58,26 @@ getNicknames =
         }
 
 
+nicknamesDecoder : Decoder (List String)
+nicknamesDecoder =
+    list string
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SendHttpRequest ->
             ( model, getNicknames )
 
-        DataReceived (Ok nicknamesStr) ->
-            let
-                nicknames =
-                    String.split "," nicknamesStr
-            in
-            ( { model | nicknames = nicknames }, Cmd.none )
+        DataReceived (Ok nicknamesJson) ->
+            case decodeString nicknamesDecoder nicknamesJson of
+                Ok nicknames ->
+                    ( { model | nicknames = nicknames }, Cmd.none )
+
+                Err error ->
+                    ( { model | errorMessage = handleJsonError error }
+                    , Cmd.none
+                    )
 
         DataReceived (Err httpError) ->
             ( { model
@@ -76,6 +85,16 @@ update msg model =
               }
             , Cmd.none
             )
+
+
+handleJsonError : Json.Decode.Error -> Maybe String
+handleJsonError error =
+    case error of
+        Failure errorMessage _ ->
+            Just errorMessage
+
+        _ ->
+            Just "Error: Invalid JSON"
 
 
 buildErrorMessage : Http.Error -> String
