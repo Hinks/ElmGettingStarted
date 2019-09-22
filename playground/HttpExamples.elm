@@ -42,7 +42,7 @@ init _ =
 
 type Msg
     = SendHttpRequest
-    | DataReceived (Result Http.Error String)
+    | DataReceived (Result Http.Error (List String))
 
 
 url : String
@@ -54,7 +54,7 @@ getNicknames : Cmd Msg
 getNicknames =
     Http.get
         { url = url
-        , expect = Http.expectString DataReceived
+        , expect = Http.expectJson DataReceived nicknamesDecoder
         }
 
 
@@ -69,15 +69,8 @@ update msg model =
         SendHttpRequest ->
             ( model, getNicknames )
 
-        DataReceived (Ok nicknamesJson) ->
-            case decodeString nicknamesDecoder nicknamesJson of
-                Ok nicknames ->
-                    ( { model | nicknames = nicknames }, Cmd.none )
-
-                Err error ->
-                    ( { model | errorMessage = handleJsonError error }
-                    , Cmd.none
-                    )
+        DataReceived (Ok nicknames) ->
+            ( { model | nicknames = nicknames }, Cmd.none )
 
         DataReceived (Err httpError) ->
             ( { model
@@ -85,16 +78,6 @@ update msg model =
               }
             , Cmd.none
             )
-
-
-handleJsonError : Json.Decode.Error -> Maybe String
-handleJsonError error =
-    case error of
-        Failure errorMessage _ ->
-            Just errorMessage
-
-        _ ->
-            Just "Error: Invalid JSON"
 
 
 buildErrorMessage : Http.Error -> String
