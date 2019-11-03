@@ -1,4 +1,4 @@
-module Main exposing (Model, main, update, view)
+module HttpExamples exposing (Model, main, update, view)
 
 import Browser
 import Html exposing (..)
@@ -90,7 +90,7 @@ buildErrorMessage httpError =
             "Server is taking too long to respond. Please try again later."
 
         Http.NetworkError ->
-            "Unable to reack server."
+            "Unable to reach server."
 
         Http.BadStatus statusCode ->
             "Request failed with status code: " ++ String.fromInt statusCode

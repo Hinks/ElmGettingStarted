@@ -1,4 +1,4 @@
-module Main exposing (Face(..), Model, Msg(..), init, main, roundRectStyle, subscriptions, update, view, viewDice, viewDie, viewDieFace, viewRoundRect)
+module Random07 exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Dict exposing (Dict)

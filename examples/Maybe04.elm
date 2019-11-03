@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), Temperature(..), celsiusToFarehheit, farenheitToCelsius, init, main, swapTemperatureConverter, toTemperature, update, view, viewConverter)
+module Maybe04 exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (Attribute, Html, button, input, span, text)

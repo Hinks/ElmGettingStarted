@@ -1,4 +1,4 @@
-module Main exposing (main)
+module SlackElmUiTutorial exposing (main)
 
 import Element exposing (..)
 import Element.Background as Background

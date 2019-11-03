@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), containsAllVariationsOf, hasLowerCase, hasNumber, hasUpperCase, init, main, passwordError, passwordIsOver, passwordMatch, passwordValidation, update, view, viewInput, viewValidation)
+module Form03 exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (..)

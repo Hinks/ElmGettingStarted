@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
+module Time08 exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (..)

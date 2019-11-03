@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), init, main, update, view)
+module Field02 exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (Attribute, Html, div, input, text)

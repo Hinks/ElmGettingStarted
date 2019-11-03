@@ -1,4 +1,4 @@
-module Main exposing (Model(..), Msg(..), getRandomCatGif, gifDecoder, init, main, subscriptions, update, view, viewGif)
+module Json06 exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (..)
