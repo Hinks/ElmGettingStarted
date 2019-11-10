@@ -14,6 +14,13 @@ import Json.Decode as Decode
         , map3
         , string
         )
+import Json.Decode.Pipeline
+    exposing
+        ( optional
+        , optionalAt
+        , required
+        , requiredAt
+        )
 
 
 type alias Post =
@@ -100,10 +107,10 @@ type Msg
 
 postDecoder : Decoder Post
 postDecoder =
-    map3 Post
-        (field "id" int)
-        (field "title" string)
-        (field "author" string)
+    Decode.succeed Post
+        |> required "id" int
+        |> required "title" string
+        |> optional "author" string "anonymous"
 
 
 httpCommand : Cmd Msg
