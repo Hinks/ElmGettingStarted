@@ -1,24 +1,20 @@
 {
-    "posts": [
-      {
-        "id": 1,
-        "title": "json-server",
-        "author": "typicode"
-      },
-      {
-        "id": 2,
-        "title": "http-server",
-        "author": "indexzero"
+  "posts": [
+    {
+      "id": 1,
+      "title": "json-server",
+      "author": {
+          "name": "typicode",
+          "url": "https://github.com/typicode"
       }
-    ],
-    "comments": [
-      {
-        "id": 1,
-        "body": "some comment",
-        "postId": 1
+    },
+    {
+      "id": 2,
+      "title": "http-server",
+      "author": {
+          "name": "indexzero",
+          "url": "https://github.com/indexzero"
       }
-    ],
-    "profile": {
-      "name": "typicode"
     }
-  }
+  ]
+}
