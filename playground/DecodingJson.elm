@@ -2,6 +2,7 @@ module DecodingJson exposing (main)
 
 import Browser
 import Html exposing (..)
+import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
@@ -23,10 +24,16 @@ import Json.Decode.Pipeline
         )
 
 
+type alias Author =
+    { name : String
+    , url : String
+    }
+
+
 type alias Post =
     { id : Int
     , title : String
-    , author : String
+    , author : Author
     }
 
 
@@ -96,7 +103,7 @@ viewPost post =
         , th []
             [ text post.title ]
         , th []
-            [ text post.author ]
+            [ a [ href post.author.url ] [ text post.author.name ] ]
         ]
 
 
@@ -105,12 +112,19 @@ type Msg
     | DataReceived (Result Http.Error (List Post))
 
 
+authorDecoder : Decoder Author
+authorDecoder =
+    Decode.succeed Author
+        |> required "name" string
+        |> required "url" string
+
+
 postDecoder : Decoder Post
 postDecoder =
     Decode.succeed Post
         |> required "id" int
         |> required "title" string
-        |> optional "author" string "anonymous"
+        |> required "author" authorDecoder
 
 
 httpCommand : Cmd Msg
