@@ -8,32 +8,21 @@ import Http
 import Json.Decode as Decode
     exposing
         ( Decoder
-        , decodeString
-        , field
         , int
         , list
-        , map3
         , string
         )
 import Json.Decode.Pipeline
     exposing
-        ( optional
-        , optionalAt
-        , required
-        , requiredAt
+        ( required
         )
-
-
-type alias Author =
-    { name : String
-    , url : String
-    }
 
 
 type alias Post =
     { id : Int
     , title : String
-    , author : Author
+    , authorName : String
+    , authorUrl : String
     }
 
 
@@ -103,7 +92,7 @@ viewPost post =
         , th []
             [ text post.title ]
         , th []
-            [ a [ href post.author.url ] [ text post.author.name ] ]
+            [ a [ href post.authorUrl ] [ text post.authorName ] ]
         ]
 
 
@@ -112,19 +101,13 @@ type Msg
     | DataReceived (Result Http.Error (List Post))
 
 
-authorDecoder : Decoder Author
-authorDecoder =
-    Decode.succeed Author
-        |> required "name" string
-        |> required "url" string
-
-
 postDecoder : Decoder Post
 postDecoder =
     Decode.succeed Post
         |> required "id" int
         |> required "title" string
-        |> required "author" authorDecoder
+        |> required "authorName" string
+        |> required "authorUrl" string
 
 
 httpCommand : Cmd Msg
