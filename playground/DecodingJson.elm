@@ -16,6 +16,7 @@ import Json.Decode.Pipeline
     exposing
         ( required
         )
+import RemoteData exposing (RemoteData, WebData)
 
 
 type alias Post =
