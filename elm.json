@@ -2,7 +2,8 @@
     "type": "application",
     "source-directories": [
         "examples",
-        "playground"
+        "playground",
+        "post-app"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
