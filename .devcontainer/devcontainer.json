@@ -12,6 +12,7 @@
 	// your server accepts connections from all interfaces (0.0.0.0 or '*'), not just localhost.
 	// 8000 is the default port used for the `elm reactor` command. 
 	// 5019 is the port for json-server, run: json-server --watch server/db.json -H 0.0.0.0 -p 5019 --delay 1000
+	// elm-live run: elm-live post-app/Main.elm --pushstate -h 0.0.0.0
 	"appPort": [8000, 5019],
 
 	// Uncomment the next line to run commands after the container is created.
